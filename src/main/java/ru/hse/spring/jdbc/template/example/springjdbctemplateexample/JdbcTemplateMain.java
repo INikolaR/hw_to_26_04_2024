@@ -1,6 +1,7 @@
 package ru.hse.spring.jdbc.template.example.springjdbctemplateexample;
 
 import org.postgresql.ds.PGSimpleDataSource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -19,11 +20,15 @@ public class JdbcTemplateMain {
 
         JdbcOperations jdbcOperations = new JdbcTemplate(dataSource);
 
-        Person person = jdbcOperations.queryForObject(
-                "select first_name, last_name from person where id = ?",
-                (rs, rowNum) -> new Person(rs.getString("first_name"), rs.getString("last_name")),
-                1);
-
+        Person person = null;
+        try {
+            person = jdbcOperations.queryForObject(
+                    "select first_name, last_name from person where id = ?",
+                    (rs, rowNum) -> new Person(rs.getString("first_name"), rs.getString("last_name")),
+                    1);
+        } catch (org.springframework.dao.DataAccessException e) {
+            System.out.println(e.getMessage() + " Cannot access data correctly!");
+        }
         if (person != null) {
             render(person);
         }
